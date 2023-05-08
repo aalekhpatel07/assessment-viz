@@ -1,12 +1,11 @@
-use serde::{Serialize, Deserialize, Deserializer};
-use geojson::Geometry;
 use chrono::{DateTime, Utc};
-use std::str::FromStr;
-use std::fmt::Display;
+use geojson::Geometry;
+use serde::{Deserialize, Deserializer, Serialize};
 use serde_aux::prelude::*;
+use std::fmt::Display;
+use std::str::FromStr;
 
 pub type Url = String;
-
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Record {
@@ -113,9 +112,8 @@ pub struct AssessmentProperties {
     water_frontage_measurement: Option<f64>,
     #[serde(deserialize_with = "deserialize_option_number_from_string")]
     year_built: Option<usize>,
-    zoning: Option<String>
+    zoning: Option<String>,
 }
-
 
 pub fn deserialize_option_datetime_from_string<'de, T, D>(
     deserializer: D,
@@ -136,7 +134,9 @@ where
     match DateTimeOrNull::<T>::deserialize(deserializer)? {
         DateTimeOrNull::Str(s) => match s {
             "" => Ok(None),
-            _ => T::from_str(&format!("{}Z", s)).map(Some).map_err(serde::de::Error::custom),
+            _ => T::from_str(&format!("{}Z", s))
+                .map(Some)
+                .map_err(serde::de::Error::custom),
         },
         DateTimeOrNull::FromStr(i) => Ok(Some(i)),
         DateTimeOrNull::Null => Ok(None),
@@ -161,18 +161,19 @@ where
         BoolOrNull::Str(s) => match s {
             "Yes" | "yes" | "true" => Ok(Some(true)),
             "No" | "no" | "false" => Ok(Some(false)),
-            _ => bool::from_str(s).map(Some).map_err(serde::de::Error::custom),
+            _ => bool::from_str(s)
+                .map(Some)
+                .map_err(serde::de::Error::custom),
         },
         BoolOrNull::FromStr(i) => Ok(Some(i)),
         BoolOrNull::Null => Ok(None),
     }
 }
 
-
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(tag="type")]
+#[serde(tag = "type")]
 pub enum Features {
-    FeatureCollection(FeatureCollection)
+    FeatureCollection(FeatureCollection),
 }
 
 impl Default for Features {
@@ -192,14 +193,11 @@ impl Features {
     }
 }
 
-
 #[derive(Debug, Serialize, Deserialize, Default)]
 #[serde()]
 pub struct FeatureCollection {
-    pub features: Vec<Record>
+    pub features: Vec<Record>,
 }
-
-
 
 #[cfg(test)]
 mod tests {
@@ -207,7 +205,6 @@ mod tests {
 
     #[test]
     fn null_properties() {
-
         let s = r#"{"type": "FeatureCollection", "features": [{"geometry": null, "properties": null, "type": "Feature", "foo": "2017-04-07T11:11:23.348"}]}"#;
         assert!(serde_json::from_str::<Features>(s).is_ok());
         let f = serde_json::from_str::<Features>(s).unwrap();
