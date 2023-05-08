@@ -1,2 +1,3 @@
 /assessment-server/target
 data
+.env
