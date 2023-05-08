@@ -186,6 +186,10 @@ impl Features {
         let Self::FeatureCollection(collection) = self;
         collection.features.len()
     }
+    pub fn is_empty(&self) -> bool {
+        let Self::FeatureCollection(collection) = self;
+        collection.features.is_empty()
+    }
 }
 
 

@@ -90,7 +90,7 @@ pub async fn load_data(db: &Database, name: &str, records: &[Record]) -> IgnoreE
         db
         .collection::<Record>(name)
         .insert_many(
-            records.into_iter(),
+            records.iter(),
             None
         )
         .await?
